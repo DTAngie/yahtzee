@@ -1,3 +1,9 @@
+const diceBoardEl = document.getElementById("dice-board");
+const rollBtn = document.getElementById("roll-btn");
+
+rollBtn.addEventListener('click', handleRollDice);
+
+
 const dice = {}
 const scoreboard = {
   ones: {
@@ -55,6 +61,24 @@ const scoreboard = {
 function init() {
   resetScoreBoard();
   generateDice();
+  rollDice();
+  render();
+}
+
+function render(){
+  diceBoardEl.innerHTML = "";
+ for(d in dice){
+  let diceEl = document.createElement("div");
+  diceEl.classList.add("dice");
+  diceEl.setAttribute('id', d);
+  diceEl.textContent = dice[d].value;
+  diceBoardEl.appendChild(diceEl);
+ }
+}
+
+function handleRollDice() {
+  rollDice();
+  render();
 }
 
 function resetScoreBoard() {
@@ -69,8 +93,16 @@ function generateDice(){
   for (d = 1; d < 7; d++) {
     dice[d] = {};
     dice[d].hold = false;
-    dice[d].value = 0;
+    dice[d].value = 0;   
   }
 }
+
+function rollDice() {
+  for(d in dice){
+    dice[d].value = Math.floor(Math.random()*6);
+  }
+  console.log(dice);
+}
+
 
 init();
