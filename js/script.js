@@ -1,61 +1,90 @@
 const diceBoardEl = document.getElementById("dice-board");
 const rollBtn = document.getElementById("roll-btn");
+const confirmBtn = document.getElementById("confirm");
+const scoreboardEl = document.getElementById("scoreboard");
 const playerScoreEl = document.getElementById("score");
 
 rollBtn.addEventListener('click', handleRollDice);
 diceBoardEl.addEventListener('click', handleDiceClick);
+confirmBtn.addEventListener('click', handleConfirmChoice);
 
 let currentRoll, totalScore;
 const dice = {}
 const scoreboard = {
-  ones: {
+  0: {
     requires: 1, //flat score will be hardcoded, otherwise this will be a multiple
-    upperSection: true
+    upperSection: true,
+    display: "1",
+    scoring: "Sum all 1s"
   },
-  twos: {
+  1: {
     requires: 2,
-    upperSection: true
+    upperSection: true,
+    display: "2",
+    scoring: "Sum all 2s"
   },
-  threes: {
+  2: {
     requires: 3,
-    upperSection: true
+    upperSection: true,
+    display: "3",
+    scoring: "Sum all 3s"
   },
-  fours: {
+  3: {
     requires: 4,
-    upperSection: true
+    upperSection: true,
+    display: "4",
+    scoring: "Sum all 4s"
   },
-  fives: {
+  4: {
     requires: 5,
-    upperSection: true
+    upperSection: true,
+    display: "5",
+    scoring: "Sum all 5s"
   },
-  six: {
+  5: {
     requires: 6,
-    upperSection: true
+    upperSection: true,
+    display: "6",
+    scoring: "Sum all 6s"
   }, 
-  threeOfAKind: {
-    upperSection: false
+  6: {
+    upperSection: false,
+    display: "Three of a Kind",
+    scoring: "Sum all dice"
   },
-  fourOfAKind: {
-    upperSection: false
+  7: {
+    upperSection: false,
+    display: "Four of a Kind",
+    scoring: "Sum all dice"
   },
-  fullHouse: {
+  8: {
     flatScore: 25,
-    upperSection: false
+    upperSection: false,
+    display: "Full House",
+    scoring: "25 points"
   },
-  smallStraight: {
+  9: {
     flatScore: 30,
-    upperSection: false
+    upperSection: false,
+    display: "Small Straight",
+    scoring: "30 points"
   },
-  largeStraight: {
+  10: {
     flatScore: 40,
-    upperSection: false
+    upperSection: false,
+    display: "Large Straight",
+    scoring: "40 points"
   },
-  yahtzee: {
+  11: {
     flatScore: 50,
-    upperSection: false
+    upperSection: false,
+    display: "Yahtzee",
+    scoring: "50 points"
   },
-  chance: {
-    upperSection: false
+  12: {
+    upperSection: false,
+    display: "Chance",
+    scoring: "Sum all dice"
   }
 }
 
@@ -63,7 +92,8 @@ const scoreboard = {
 function init() {
   currentRoll = 1;
   totalScore = 0;
-  resetScoreBoard();
+
+  resetScore();
   generateDice();
   rollDice();
   render();
@@ -78,6 +108,7 @@ function render(){
   diceEl.setAttribute('id', d);
   diceEl.textContent = dice[d].value;
   diceBoardEl.appendChild(diceEl);
+  generateScoreBoard();
  }
  playerScoreEl.innerText = totalScore;
 }
@@ -100,10 +131,14 @@ function handleDiceClick(e) {
   }
 }
 
-function resetScoreBoard() {
+function handleConfirmChoice() {
+
+}
+
+function resetScore() {
   for(score in scoreboard) {
     scoreboard[score].taken = false;
-    scoreboard[score].userScore = 0;
+    scoreboard[score].userScore = null;
   }
   console.log(scoreboard)
 }
@@ -116,14 +151,31 @@ function generateDice(){
   }
 }
 
+function generateScoreBoard(){
+  scoreboardEl.innerHTML = "";
+  for(let i = 0; i < Object.entries(scoreboard).length; i++) {
+    let scoreRowEl = document.createElement('div');
+    let nameDivEl = document.createElement('div');
+    let scoringDivEl = document.createElement('div');
+    let playerScoreDivEl = document.createElement('div');
+    scoreRowEl.classList.add('scoreboard-row');
+    nameDivEl.classList.add('category');
+    nameDivEl.textContent = scoreboard[i].display;
+    scoringDivEl.classList.add('scoring');
+    scoringDivEl.textContent = scoreboard[i].scoring;
+    playerScoreDivEl.classList.add('player-score')
+    playerScoreDivEl.textContent = scoreboard[0].userScore;
+    scoreboardEl.append(scoreRowEl);
+    scoreRowEl.append(nameDivEl);
+    scoreRowEl.append(scoringDivEl);
+    scoreRowEl.append(playerScoreDivEl);
+  }
+}
+
 function rollDice() {
+  if (currentRoll > 3) return;
   console.log('current roll is', currentRoll)
   for(d in dice){
-    if(currentRoll === 3) {
-      dice[d]
-      currentRoll = 0;
-  
-    }
     if(!dice[d].hold) {
       dice[d].value = Math.floor(Math.random()*6)+1;
     } 

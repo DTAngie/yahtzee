@@ -1,6 +1,37 @@
+button {
+  cursor: pointer;
+}
+
 div.flex {
   display: flex;
   margin-bottom: 20px;
+}
+
+#scoreboard {
+  border: 2px solid red;
+  border-radius: 4px;
+  width: 80%;
+}
+
+.scoreboard-row {
+  display: flex;
+}
+
+.scoreboard-row > div {
+  display: inline-block;
+  border: 1px solid #ccc;
+}
+
+.scoreboard-row > .category {
+  width: 40%;
+}
+
+.scoreboard-row > .scoring {
+  width: 30%;
+}
+
+.scoreboard-row > .player-score {
+  width: 20%;
 }
 
 #dice-board {
@@ -19,8 +50,12 @@ div.flex {
   margin: 0 auto;
 }
 
+#btn-group {
+  justify-content: space-around;
+}
+
 #roll-btn {
-  margin: 0 auto;
+  /* margin: 0 auto; */
 }
 
 .hold {
