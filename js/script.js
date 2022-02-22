@@ -1,9 +1,11 @@
 const diceBoardEl = document.getElementById("dice-board");
 const rollBtn = document.getElementById("roll-btn");
+const playerScoreEl = document.getElementById("score");
 
 rollBtn.addEventListener('click', handleRollDice);
+diceBoardEl.addEventListener('click', handleDiceClick);
 
-
+let currentRoll, totalScore;
 const dice = {}
 const scoreboard = {
   ones: {
@@ -59,6 +61,8 @@ const scoreboard = {
 
 
 function init() {
+  currentRoll = 1;
+  totalScore = 0;
   resetScoreBoard();
   generateDice();
   rollDice();
@@ -70,15 +74,30 @@ function render(){
  for(d in dice){
   let diceEl = document.createElement("div");
   diceEl.classList.add("dice");
+  if (dice[d].hold) diceEl.classList.add("hold");
   diceEl.setAttribute('id', d);
   diceEl.textContent = dice[d].value;
   diceBoardEl.appendChild(diceEl);
  }
+ playerScoreEl.innerText = totalScore;
 }
 
 function handleRollDice() {
   rollDice();
   render();
+}
+
+function handleDiceClick(e) {
+  if (!e.target.classList.contains("dice")) {
+    return;
+  }
+  if(dice[e.target.id].hold) {
+    dice[e.target.id].hold = false;
+    e.target.classList.remove("hold")
+  } else {
+    dice[e.target.id].hold = true; 
+    e.target.classList.add("hold");
+  }
 }
 
 function resetScoreBoard() {
@@ -98,9 +117,18 @@ function generateDice(){
 }
 
 function rollDice() {
+  console.log('current roll is', currentRoll)
   for(d in dice){
-    dice[d].value = Math.floor(Math.random()*6);
+    if(currentRoll === 3) {
+      dice[d]
+      currentRoll = 0;
+  
+    }
+    if(!dice[d].hold) {
+      dice[d].value = Math.floor(Math.random()*6)+1;
+    } 
   }
+  currentRoll++;
   console.log(dice);
 }
 
