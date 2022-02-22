@@ -7,10 +7,12 @@ const playerScoreEl = document.getElementById("score");
 rollBtn.addEventListener('click', handleRollDice);
 diceBoardEl.addEventListener('click', handleDiceClick);
 confirmBtn.addEventListener('click', handleConfirmChoice);
+scoreboardEl.addEventListener('click', handleAddScore);
 
 let currentRoll, totalScore;
-const dice = {}
-const scoreboard = {
+let dice = {}
+let diceArray = []
+let scoreboard = {
   0: {
     requires: 1, //flat score will be hardcoded, otherwise this will be a multiple
     upperSection: true,
@@ -92,6 +94,8 @@ const scoreboard = {
 function init() {
   currentRoll = 1;
   totalScore = 0;
+  dice = {};
+  diceArray = [];
 
   resetScore();
   generateDice();
@@ -111,6 +115,12 @@ function render(){
   generateScoreBoard();
  }
  playerScoreEl.innerText = totalScore;
+ if (currentRoll === 4) {
+   rollBtn.setAttribute('disabled', true)
+ } else {
+   rollBtn.removeAttribute('disabled');
+ }
+ //TODO: disable confirm button unless score is selected
 }
 
 function handleRollDice() {
@@ -132,7 +142,21 @@ function handleDiceClick(e) {
 }
 
 function handleConfirmChoice() {
+  currentRoll = 1;
+  for(d in dice) {
+    dice[d].hold = false;
+  }
+  rollDice();
+  render();
+}
 
+function handleAddScore(e) {
+  if(!e.target.id) return;
+  let el = e.target;
+  let category = scoreboard[e.target.id];
+  if (category.upperSection){
+    el.textContent = category.requires * (diceArray.filter(x => x === category.requires).length)
+  }
 }
 
 function resetScore() {
@@ -158,6 +182,7 @@ function generateScoreBoard(){
     let nameDivEl = document.createElement('div');
     let scoringDivEl = document.createElement('div');
     let playerScoreDivEl = document.createElement('div');
+    playerScoreDivEl.setAttribute('id', i);
     scoreRowEl.classList.add('scoreboard-row');
     nameDivEl.classList.add('category');
     nameDivEl.textContent = scoreboard[i].display;
@@ -175,13 +200,14 @@ function generateScoreBoard(){
 function rollDice() {
   if (currentRoll > 3) return;
   console.log('current roll is', currentRoll)
+  diceArray = [];
   for(d in dice){
     if(!dice[d].hold) {
       dice[d].value = Math.floor(Math.random()*6)+1;
     } 
+    diceArray.push(dice[d].value);
   }
   currentRoll++;
-  console.log(dice);
 }
 
 
