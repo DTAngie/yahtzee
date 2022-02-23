@@ -9,9 +9,10 @@ diceBoardEl.addEventListener('click', handleDiceClick);
 confirmBtn.addEventListener('click', handleConfirmChoice);
 scoreboardEl.addEventListener('click', handleAddScore);
 
-let currentRoll, totalScore;
-let dice = {}
-let diceArray = []
+let currentRoll, totalScore, previousSelection;
+let dice = {};
+let diceArray = [];
+let selectedCategory = {};
 let scoreboard = {
   0: {
     requires: 1, //flat score will be hardcoded, otherwise this will be a multiple
@@ -96,6 +97,10 @@ function init() {
   totalScore = 0;
   dice = {};
   diceArray = [];
+  selectedCategory = {
+    id: null,
+    score: null
+  }
 
   resetScore();
   generateDice();
@@ -120,7 +125,6 @@ function render(){
  } else {
    rollBtn.removeAttribute('disabled');
  }
- //TODO: disable confirm button unless score is selected
 }
 
 function handleRollDice() {
@@ -141,28 +145,42 @@ function handleDiceClick(e) {
   }
 }
 
-function handleConfirmChoice() {
+function handleConfirmChoice(e) {
   currentRoll = 1;
+  scoreboard[selectedCategory.id].playerScore = selectedCategory.score;
   for(d in dice) {
     dice[d].hold = false;
   }
+  e.target.setAttribute("disabled", true);
+  previousSelection = null;
+  selectedCategory.id = null;
+  selectedCategory.score = null;
   rollDice();
   render();
 }
 
 function handleAddScore(e) {
   if(!e.target.id) return;
-  let el = e.target;
   let category = scoreboard[e.target.id];
+  if(category.playerScore) return;
+  let el = e.target;
+  // this prevents multiple scores per round
+  if(previousSelection) {
+    previousSelection.innerHTML = "";
+  }
+  previousSelection = e.target; 
+  confirmBtn.removeAttribute("disabled");
   if (category.upperSection){
-    el.textContent = category.requires * (diceArray.filter(x => x === category.requires).length)
+    selectedCategory.id = e.target.id;
+    selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
+    el.textContent = selectedCategory.score;
   }
 }
 
 function resetScore() {
   for(score in scoreboard) {
     scoreboard[score].taken = false;
-    scoreboard[score].userScore = null;
+    scoreboard[score].playerScore = null;
   }
   console.log(scoreboard)
 }
@@ -189,7 +207,7 @@ function generateScoreBoard(){
     scoringDivEl.classList.add('scoring');
     scoringDivEl.textContent = scoreboard[i].scoring;
     playerScoreDivEl.classList.add('player-score')
-    playerScoreDivEl.textContent = scoreboard[0].userScore;
+    playerScoreDivEl.textContent = scoreboard[i].playerScore;
     scoreboardEl.append(scoreRowEl);
     scoreRowEl.append(nameDivEl);
     scoreRowEl.append(scoringDivEl);
