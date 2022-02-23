@@ -18,7 +18,7 @@ let scoreboard = {
     requires: 1, //flat score will be hardcoded, otherwise this will be a multiple
     upperSection: true,
     display: "1",
-    scoring: "Sum all 1s"
+    scoring: "Sum all 1s",
   },
   1: {
     requires: 2,
@@ -171,10 +171,33 @@ function handleAddScore(e) {
   previousSelection = e.target; 
   confirmBtn.removeAttribute("disabled");
   if (category.upperSection){
-    selectedCategory.id = e.target.id;
     selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
-    el.textContent = selectedCategory.score;
   }
+  switch (e.target.id) {
+    case "6":
+      //check for three of a kind
+      break;
+    case "7":
+      //check for four of a kind
+      break;
+    case "8":
+      //check for full house
+      break;
+    case "9":
+      //check for small straight
+      break;
+    case "10":
+      //check for large straight
+      break;
+    case "11":
+      //check for yahtzee
+      break;
+    case "12":
+      selectedCategory.score = diceArray.reduce((a,b) => {return a+b});
+      break;
+  }
+  selectedCategory.id = e.target.id;
+  el.textContent = selectedCategory.score;
 }
 
 function resetScore() {
