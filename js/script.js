@@ -15,79 +15,127 @@ let diceArray = [];
 let selectedCategory = {};
 let scoreboard = {
   0: {
-    requires: 1, //flat score will be hardcoded, otherwise this will be a multiple
+    requires: 1,
     upperSection: true,
     display: "1",
     scoring: "Sum all 1s",
+    locked: false
   },
   1: {
     requires: 2,
     upperSection: true,
     display: "2",
-    scoring: "Sum all 2s"
+    scoring: "Sum all 2s",
+    locked: false
   },
   2: {
     requires: 3,
     upperSection: true,
     display: "3",
-    scoring: "Sum all 3s"
+    scoring: "Sum all 3s",
+    locked: false
   },
   3: {
     requires: 4,
     upperSection: true,
     display: "4",
-    scoring: "Sum all 4s"
+    scoring: "Sum all 4s",
+    locked: false
   },
   4: {
     requires: 5,
     upperSection: true,
     display: "5",
-    scoring: "Sum all 5s"
+    scoring: "Sum all 5s",
+    locked: false
   },
   5: {
     requires: 6,
     upperSection: true,
     display: "6",
-    scoring: "Sum all 6s"
+    scoring: "Sum all 6s",
+    locked: false
   }, 
   6: {
-    upperSection: false,
-    display: "Three of a Kind",
-    scoring: "Sum all dice"
+    locked: true,
+    display: "Total Score",
+    scoring: "==>",
+    total: function(){
+      console.log(scoreboard[6].total);
+      let upperSum = 0;
+      for(let i = 0; i < 6; i++){
+        upperSum += (scoreboard[i].playerScore) ? scoreboard[i].playerScore : 0;
+      }
+      return upperSum;
+    }
   },
   7: {
-    upperSection: false,
-    display: "Four of a Kind",
-    scoring: "Sum all dice"
+    locked: true,
+    display: "Bonus Score",
+    display2: "(if total score is 63 or over)",
+    scoring: "35 points",
+    flatScore: 35,
+    bonusReached: false,
+    total: function(){
+      if(this.bonusReached) {
+        return this.flatScore;
+      }
+      return 0;
+    }
   },
   8: {
+    locked: true,
+    display: "Total of the Upper Section",
+    scoring: "->",
+    total: function(){
+      
+    }
+  },
+  9: {
+    upperSection: false,
+    display: "Three of a Kind",
+    scoring: "Sum all dice",
+    locked: false
+  },
+  10: {
+    upperSection: false,
+    display: "Four of a Kind",
+    scoring: "Sum all dice",
+    locked: false
+  },
+  11: {
     flatScore: 25,
     upperSection: false,
     display: "Full House",
-    scoring: "25 points"
+    scoring: "25 points",
+    locked: false
   },
-  9: {
+  12: {
     flatScore: 30,
     upperSection: false,
     display: "Small Straight",
-    scoring: "30 points"
+    scoring: "30 points",
+    locked: false
   },
-  10: {
+  13: {
     flatScore: 40,
     upperSection: false,
     display: "Large Straight",
-    scoring: "40 points"
+    scoring: "40 points",
+    locked: false
   },
-  11: {
+  14: {
     flatScore: 50,
     upperSection: false,
     display: "Yahtzee",
-    scoring: "50 points"
+    scoring: "50 points",
+    locked: false
   },
-  12: {
+  15: {
     upperSection: false,
     display: "Chance",
-    scoring: "Sum all dice"
+    scoring: "Sum all dice",
+    locked: false
   }
 }
 
@@ -101,7 +149,6 @@ function init() {
     id: null,
     score: null
   }
-
   resetScore();
   generateDice();
   rollDice();
@@ -110,21 +157,21 @@ function init() {
 
 function render(){
   diceBoardEl.innerHTML = "";
- for(d in dice){
-  let diceEl = document.createElement("div");
-  diceEl.classList.add("dice");
-  if (dice[d].hold) diceEl.classList.add("hold");
-  diceEl.setAttribute('id', d);
-  diceEl.textContent = dice[d].value;
-  diceBoardEl.appendChild(diceEl);
+  for(d in dice){
+    let diceEl = document.createElement("div");
+    diceEl.classList.add("dice");
+    if (dice[d].hold) diceEl.classList.add("hold");
+    diceEl.setAttribute('id', d);
+    diceEl.textContent = dice[d].value;
+    diceBoardEl.appendChild(diceEl);
+  }
   generateScoreBoard();
- }
- playerScoreEl.innerText = totalScore;
- if (currentRoll === 4) {
-   rollBtn.setAttribute('disabled', true)
- } else {
-   rollBtn.removeAttribute('disabled');
- }
+  playerScoreEl.innerText = totalScore;
+  if (currentRoll === 4) {
+    rollBtn.setAttribute('disabled', true)
+  } else {
+    rollBtn.removeAttribute('disabled');
+  }
 }
 
 function handleRollDice() {
@@ -155,6 +202,7 @@ function handleConfirmChoice(e) {
   previousSelection = null;
   selectedCategory.id = null;
   selectedCategory.score = null;
+  updateTotals();
   rollDice();
   render();
 }
@@ -162,7 +210,7 @@ function handleConfirmChoice(e) {
 function handleAddScore(e) {
   if(!e.target.id) return;
   let category = scoreboard[e.target.id];
-  if(category.playerScore) return;
+  if(category.playerScore || category.locked) return;
   let el = e.target;
   // this prevents multiple scores per round
   if(previousSelection) {
@@ -173,34 +221,33 @@ function handleAddScore(e) {
   if (category.upperSection){
     selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
   }
+  diceArray.sort();
   switch (e.target.id) {
-    case "6":
-      diceArray.sort();
-      selectedCategory.score = (diceArray[2] === diceArray[0] || diceArray[2] === diceArray[4]) ? diceArray.reduce((a,b) => {return a+b}) : 0;
-      break;
-    case "7":
-      diceArray.sort();
-      selectedCategory.score = (diceArray[3] === diceArray[0] || diceArray[4] === diceArray[1]) ? diceArray.reduce((a,b) => {return a+b}) : 0;
-      //check for four of a kind
-      break;
-    case "8":
-      //check for full house
-      break;
     case "9":
-      s = diceArray.sort().filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
-      selectedCategory.score = (s.includes('1234') || s.includes('2345') || s.includes('3456')) ? 30 : 0;
+      s = diceArray.filter((d, idx, diceArray) => diceArray[idx+2] === d);
+      selectedCategory.score = s.length ? diceArray.reduce((a,b) => a+b) : 0;
       break;
-      case "10":
-        s = diceArray.sort().filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
-      selectedCategory.score = (s.includes('12345') || s.includes('23456')) ? 40 : 0;
+    case "10":
+      s = diceArray.filter((d, idx, diceArray) => diceArray[idx+3] === d);
+      selectedCategory.score = s.length ? diceArray.reduce((a,b) => a+b) : 0;
       break;
     case "11":
-      diceArray.sort();
-      selectedCategory.score = (diceArray[0] === diceArray[4]) ? 50 : 0; 
-      //TODO: check for multiple yahtzees
+      selectedCategory.score = ((diceArray[0] === diceArray[1] && diceArray[2] === diceArray[4]) || (diceArray[0] === diceArray[2] && diceArray[3] === diceArray[4])) ? category.flatScore : 0;
       break;
     case "12":
-      selectedCategory.score = diceArray.reduce((a,b) => {return a+b});
+      s = diceArray.filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
+      selectedCategory.score = (s.includes('1234') || s.includes('2345') || s.includes('3456')) ? category.flatScore : 0;
+      break;
+    case "13":
+      s = diceArray.filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
+      selectedCategory.score = (s.includes('12345') || s.includes('23456')) ? category.flatScore : 0;
+      break;
+    case "14":
+      selectedCategory.score = (diceArray[0] === diceArray[4]) ? category.flatScore : 0; 
+      //TODO: check for multiple yahtzees
+      break;
+    case "15":
+      selectedCategory.score = diceArray.reduce((a,b) => a+b);
       break;
   }
   selectedCategory.id = e.target.id;
@@ -209,8 +256,14 @@ function handleAddScore(e) {
 
 function resetScore() {
   for(score in scoreboard) {
-    scoreboard[score].taken = false;
-    scoreboard[score].playerScore = null;
+    let thisScore = scoreboard[score];
+    thisScore.playerScore = null;
+    if (!thisScore.locked) {
+      thisScore.taken = false;
+    }
+    if(thisScore.bonusReached) {
+      thisScore.bonusReached = false;
+    }
   }
   console.log(scoreboard)
 }
@@ -226,6 +279,8 @@ function generateDice(){
 function generateScoreBoard(){
   scoreboardEl.innerHTML = "";
   for(let i = 0; i < Object.entries(scoreboard).length; i++) {
+    console.log('this is ', i)
+    let thisCategory = scoreboard[i];
     let scoreRowEl = document.createElement('div');
     let nameDivEl = document.createElement('div');
     let scoringDivEl = document.createElement('div');
@@ -233,11 +288,11 @@ function generateScoreBoard(){
     playerScoreDivEl.setAttribute('id', i);
     scoreRowEl.classList.add('scoreboard-row');
     nameDivEl.classList.add('category');
-    nameDivEl.textContent = scoreboard[i].display;
+    nameDivEl.innerHTML = `${thisCategory.display} ${(thisCategory.display2) ? "<br>"+thisCategory.display2 : ""}`;
     scoringDivEl.classList.add('scoring');
-    scoringDivEl.textContent = scoreboard[i].scoring;
+    scoringDivEl.textContent = thisCategory.scoring;
     playerScoreDivEl.classList.add('player-score')
-    playerScoreDivEl.textContent = scoreboard[i].playerScore;
+    playerScoreDivEl.textContent = thisCategory.playerScore;
     scoreboardEl.append(scoreRowEl);
     scoreRowEl.append(nameDivEl);
     scoreRowEl.append(scoringDivEl);
@@ -258,5 +313,18 @@ function rollDice() {
   currentRoll++;
 }
 
+function updateTotals(){
+  let upperTotal = scoreboard[6];
+  let bonus = scoreboard[7];
+  let upperTotal2 = scoreboard[8];
+  upperTotal.playerScore = upperTotal.total();
+  if(upperTotal.playerScore >= 23) {
+    bonus.bonusReached = true;
+    bonus.playerScore = bonus.total();
+
+  }
+  upperTotal2.playerScore = upperTotal.playerScore + bonus.playerScore;
+  //TODO see if bonusReached can be removed for simplicity
+}
 
 init();
