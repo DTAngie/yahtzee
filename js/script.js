@@ -9,7 +9,7 @@ diceBoardEl.addEventListener('click', handleDiceClick);
 confirmBtn.addEventListener('click', handleConfirmChoice);
 scoreboardEl.addEventListener('click', handleAddScore);
 
-let currentRoll, totalScore, previousSelection;
+let currentRoll, totalScore, previousSelection, s;
 let dice = {};
 let diceArray = [];
 let selectedCategory = {};
@@ -175,22 +175,29 @@ function handleAddScore(e) {
   }
   switch (e.target.id) {
     case "6":
-      //check for three of a kind
+      diceArray.sort();
+      selectedCategory.score = (diceArray[2] === diceArray[0] || diceArray[2] === diceArray[4]) ? diceArray.reduce((a,b) => {return a+b}) : 0;
       break;
     case "7":
+      diceArray.sort();
+      selectedCategory.score = (diceArray[3] === diceArray[0] || diceArray[4] === diceArray[1]) ? diceArray.reduce((a,b) => {return a+b}) : 0;
       //check for four of a kind
       break;
     case "8":
       //check for full house
       break;
     case "9":
-      //check for small straight
+      s = diceArray.sort().filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
+      selectedCategory.score = (s.includes('1234') || s.includes('2345') || s.includes('3456')) ? 30 : 0;
       break;
-    case "10":
-      //check for large straight
+      case "10":
+        s = diceArray.sort().filter((d, idx, diceArray) => diceArray.indexOf(d) === idx).join('');
+      selectedCategory.score = (s.includes('12345') || s.includes('23456')) ? 40 : 0;
       break;
     case "11":
-      //check for yahtzee
+      diceArray.sort();
+      selectedCategory.score = (diceArray[0] === diceArray[4]) ? 50 : 0; 
+      //TODO: check for multiple yahtzees
       break;
     case "12":
       selectedCategory.score = diceArray.reduce((a,b) => {return a+b});
@@ -209,7 +216,7 @@ function resetScore() {
 }
 
 function generateDice(){
-  for (d = 1; d < 7; d++) {
+  for (d = 1; d < 6; d++) {
     dice[d] = {};
     dice[d].hold = false;
     dice[d].value = 0;   
