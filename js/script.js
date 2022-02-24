@@ -86,7 +86,7 @@ let scoreboard = {
   8: {
     locked: true,
     display: "Total of the Upper Section",
-    scoring: "->",
+    scoring: "==>",
     total: function(bonus, upperSum){
       return upperSum ? this.playerScore = (bonus + upperSum) : 0;
     }
@@ -141,6 +141,10 @@ let scoreboard = {
     display: "Yahtzee Bonus",
     scoring: "==>",
     locked: false,
+    bonus: [],
+    total: function(){
+      return this.bonus.push(100);
+    }
   },
   17: {
     locked: true,
@@ -171,6 +175,13 @@ let scoreboard = {
     }
   },
 }
+let upperTotal = scoreboard[6];
+let bonus = scoreboard[7];
+let upperTotal2 = scoreboard[8];
+let yahtzeeBonus = scoreboard[16];
+let lowerTotal  = scoreboard[17];
+let upperTotal3  = scoreboard[18];
+let grandTotal = scoreboard[19];
 
 
 function init() {
@@ -294,10 +305,9 @@ function resetScore() {
     if (!thisScore.locked) {
       thisScore.taken = false;
     }
-    if(thisScore.bonusReached) {
-      thisScore.bonusReached = false;
-    }
   }
+  bonus.bonusReached = false;
+  yahtzeeBonus.bonus = [];
   console.log(scoreboard)
 }
 
@@ -319,13 +329,24 @@ function generateScoreBoard(){
     let scoringDivEl = document.createElement('div');
     let playerScoreDivEl = document.createElement('div');
     playerScoreDivEl.setAttribute('id', i);
-    scoreRowEl.classList.add('scoreboard-row');
+    scoreRowEl.classList.add('scoreboard-row', 'flex');
     nameDivEl.classList.add('category');
     nameDivEl.innerHTML = `${thisCategory.display} ${(thisCategory.display2) ? "<br>"+thisCategory.display2 : ""}`;
     scoringDivEl.classList.add('scoring');
     scoringDivEl.textContent = thisCategory.scoring;
     playerScoreDivEl.classList.add('player-score')
-    playerScoreDivEl.textContent = thisCategory.playerScore;
+    if (i !== 16) {
+      playerScoreDivEl.textContent = thisCategory.playerScore;
+    } else {
+      playerScoreDivEl.classList.add('flex');
+      for (let j = 0; j < 3; j++){
+        let bonusDivsEl = document.createElement('div');
+        bonusDivsEl.classList.add('y-bonus');
+        bonusDivsEl.textContent = yahtzeeBonus.bonus.length ? yahtzeeBonus.bonus[j] : "";
+        playerScoreDivEl.append(bonusDivsEl);
+      }
+ 
+    }
     scoreboardEl.append(scoreRowEl);
     scoreRowEl.append(nameDivEl);
     scoreRowEl.append(scoringDivEl);
@@ -347,12 +368,6 @@ function rollDice() {
 }
 
 function updateTotals(){
-  let upperTotal = scoreboard[6];
-  let bonus = scoreboard[7];
-  let upperTotal2 = scoreboard[8];
-  let lowerTotal  = scoreboard[17];
-  let upperTotal3  = scoreboard[18];
-  let grandTotal = scoreboard[19];
   upperTotal.total();
   if(upperTotal.playerScore >= bonus.requires) {
     bonus.bonusReached = true;

@@ -2,8 +2,12 @@ button {
   cursor: pointer;
 }
 
-div.flex {
+.flex {
   display: flex;
+  margin: 0;
+}
+
+.flex.margin {
   margin-bottom: 20px;
 }
 
@@ -13,7 +17,7 @@ div.flex {
   width: 80%;
 }
 
-.scoreboard-row {
+.scoreboard-row > div.flex {
   display: flex;
 }
 
@@ -60,4 +64,13 @@ div.flex {
 
 .hold {
   background-color: #ccc;
+}
+
+.y-bonus {
+  width: 33%;
+  border-right: 1px solid #ccc;
+}
+
+.y-bonus:last-child {
+ border: none; 
 }
