@@ -61,12 +61,11 @@ let scoreboard = {
     display: "Total Score",
     scoring: "==>",
     total: function(){
-      console.log(scoreboard[6].total);
-      let upperSum = 0;
+      let upperSum = null;
       for(let i = 0; i < 6; i++){
         upperSum += (scoreboard[i].playerScore) ? scoreboard[i].playerScore : 0;
       }
-      return upperSum;
+      return upperSum ? this.playerScore = upperSum : 0;
     }
   },
   7: {
@@ -75,20 +74,21 @@ let scoreboard = {
     display2: "(if total score is 63 or over)",
     scoring: "35 points",
     flatScore: 35,
+    requires: 23,
     bonusReached: false,
     total: function(){
       if(this.bonusReached) {
-        return this.flatScore;
+        this.playerScore = this.flatScore;
       }
-      return 0;
+      return this.playerScore ? this.playerScore : 0;
     }
   },
   8: {
     locked: true,
     display: "Total of the Upper Section",
     scoring: "->",
-    total: function(){
-      
+    total: function(bonus, upperSum){
+      return upperSum ? this.playerScore = (bonus + upperSum) : 0;
     }
   },
   9: {
@@ -136,7 +136,40 @@ let scoreboard = {
     display: "Chance",
     scoring: "Sum all dice",
     locked: false
-  }
+  },
+  16: {
+    display: "Yahtzee Bonus",
+    scoring: "==>",
+    locked: false,
+  },
+  17: {
+    locked: true,
+    display: "Total of Lower Section",
+    scoring: "==>",
+    total: function(){
+      let lowerSum = null;
+      for(let i = 9; i < 17; i++){
+        lowerSum += (scoreboard[i].playerScore) ? scoreboard[i].playerScore : 0;
+      }
+      return lowerSum ? this.playerScore = lowerSum : 0;
+    }
+  },
+  18: {
+    locked: true,
+    display: "Total of Upper Section",
+    scoring: "==>",
+    total: function(sum){
+      return sum ? this.playerScore = sum : 0;
+    }
+  },
+  19: {
+    locked: true,
+    display: "Grand Total Score",
+    scoring: "==>",
+    total: function(upper, lower) {
+      return (upper || lower) ? this.playerScore = (upper + lower) : 0;
+    }
+  },
 }
 
 
@@ -317,14 +350,17 @@ function updateTotals(){
   let upperTotal = scoreboard[6];
   let bonus = scoreboard[7];
   let upperTotal2 = scoreboard[8];
-  upperTotal.playerScore = upperTotal.total();
-  if(upperTotal.playerScore >= 23) {
+  let lowerTotal  = scoreboard[17];
+  let upperTotal3  = scoreboard[18];
+  let grandTotal = scoreboard[19];
+  upperTotal.total();
+  if(upperTotal.playerScore >= bonus.requires) {
     bonus.bonusReached = true;
-    bonus.playerScore = bonus.total();
-
   }
-  upperTotal2.playerScore = upperTotal.playerScore + bonus.playerScore;
-  //TODO see if bonusReached can be removed for simplicity
+  upperTotal2.total(bonus.total(), upperTotal.playerScore);
+  lowerTotal.total();
+  upperTotal3.total(upperTotal2.playerScore);
+  grandTotal.total(upperTotal.playerScore, lowerTotal.playerScore);
 }
 
 init();
