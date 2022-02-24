@@ -142,8 +142,12 @@ let scoreboard = {
     scoring: "==>",
     locked: false,
     bonus: [],
+    flatScore: 100,
     total: function(){
-      return this.bonus.push(100);
+      return this.bonus.push(this.flatScore);
+    },
+    isEligible: function(yzee){
+      return ((this.bonus.length) < 4 && yzee.playerScore) ? {"id": this.bonus.length, "score": this.flatScore} : {};
     }
   },
   17: {
@@ -178,6 +182,7 @@ let scoreboard = {
 let upperTotal = scoreboard[6];
 let bonus = scoreboard[7];
 let upperTotal2 = scoreboard[8];
+let yahtzee = scoreboard[14];
 let yahtzeeBonus = scoreboard[16];
 let lowerTotal  = scoreboard[17];
 let upperTotal3  = scoreboard[18];
@@ -253,17 +258,33 @@ function handleConfirmChoice(e) {
 
 function handleAddScore(e) {
   if(!e.target.id) return;
-  let category = scoreboard[e.target.id];
+  let categoryID = e.target.id.split('-');
+  let category = scoreboard[categoryID[0]] ;
   if(category.playerScore || category.locked) return;
   let el = e.target;
   // this prevents multiple scores per round
   if(previousSelection) {
     previousSelection.innerHTML = "";
   }
-  previousSelection = e.target; 
+
   confirmBtn.removeAttribute("disabled");
+  selectedCategory.id = categoryID[0];
   if (category.upperSection){
     selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
+  }
+  if(categoryID[0] === '16') { //yahtzee bonus section
+    // yahtzee.playerScore= 50;
+    console.log(yahtzee)
+    let ybonus = yahtzeeBonus.isEligible(yahtzee);
+    console.log(ybonus)
+    if (Object.entries(ybonus).length) {
+      selectedCategory.id =`16-${ybonus.id}`;
+      selectedCategory.score = `${ybonus.score}`;
+      el = document.getElementById(`16-${ybonus.id}`);
+    } else {
+      selectedCategory.score = null;
+    }
+    console.log(selectedCategory)
   }
   diceArray.sort();
   switch (e.target.id) {
@@ -288,14 +309,17 @@ function handleAddScore(e) {
       break;
     case "14":
       selectedCategory.score = (diceArray[0] === diceArray[4]) ? category.flatScore : 0; 
-      //TODO: check for multiple yahtzees
+      //TODO: check for multiple yahtzees   
       break;
     case "15":
       selectedCategory.score = diceArray.reduce((a,b) => a+b);
       break;
+    case "16":
+      console.log(e.target.id)
+      break;
   }
-  selectedCategory.id = e.target.id;
   el.textContent = selectedCategory.score;
+  previousSelection = el; 
 }
 
 function resetScore() {
@@ -341,6 +365,7 @@ function generateScoreBoard(){
       playerScoreDivEl.classList.add('flex');
       for (let j = 0; j < 3; j++){
         let bonusDivsEl = document.createElement('div');
+        bonusDivsEl.setAttribute('id', `${i}-${j}`);
         bonusDivsEl.classList.add('y-bonus');
         bonusDivsEl.textContent = yahtzeeBonus.bonus.length ? yahtzeeBonus.bonus[j] : "";
         playerScoreDivEl.append(bonusDivsEl);
