@@ -147,8 +147,8 @@ let scoreboard = {
     total: function(){
       return this.bonus.length ? this.playerScore = this.bonus.reduce((a,b) => a + b) : 0;
     },
-    isEligible: function(yzee){
-      return ((this.bonus.length) < 4 && yzee.playerScore) ? {"id": this.bonus.length, "score": this.flatScore} : {};
+    isEligible: function(yzee, ydice){
+      return ((this.bonus.length) < 4 && yzee.playerScore && ydice) ? {"id": this.bonus.length, "score": this.flatScore} : {};
     }
   },
   17: {
@@ -214,7 +214,7 @@ function render(){
     if (dice[d].hold) diceEl.classList.add("hold");
     diceEl.setAttribute('id', d);
     diceEl.setAttribute("src", getImage(dice[d].value));
-    // diceEl.textContent = dice[d].value;
+    diceEl.setAttribute("alt", `dice ${dice[d].value}`);
     diceBoardEl.appendChild(diceEl);
   }
   generateScoreBoard();
@@ -286,8 +286,10 @@ function handleAddScore(e) {
   if (category.upperSection){
     selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
   }
+  diceArray.sort();
   if(categoryID[0] === '16') { //yahtzee bonus section
-    let ybonus = yahtzeeBonus.isEligible(yahtzee);
+    let hasYahtzee = diceArray[0] === diceArray[4];
+    let ybonus = yahtzeeBonus.isEligible(yahtzee, hasYahtzee);
     if (Object.entries(ybonus).length) {
       selectedCategory.id =`16-${ybonus.id}`;
       selectedCategory.score = `${ybonus.score}`;
@@ -296,7 +298,6 @@ function handleAddScore(e) {
       selectedCategory.score = null;
     }
   }
-  diceArray.sort();
   switch (e.target.id) {
     case "9":
       s = diceArray.filter((d, idx, diceArray) => diceArray[idx+2] === d);
@@ -366,7 +367,7 @@ function generateScoreBoard(){
     if (i !== 16) {
       playerScoreDivEl.textContent = thisCategory.playerScore;
     } else {
-      playerScoreDivEl.classList.add('flex');
+      playerScoreDivEl.classList.add('flex','no-padding');
       for (let j = 0; j < 3; j++){
         let bonusDivsEl = document.createElement('div');
         bonusDivsEl.setAttribute('id', `${i}-${j}`);
