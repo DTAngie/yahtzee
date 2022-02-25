@@ -38,21 +38,9 @@ button {
   width: 20%;
 }
 
-#dice-board {
-   border: 3px solid red;
-   border-radius: 3px;
-}
 
-.dice {
-  display: inline-flex;
-  width: 40px;
-  height: 40px;
-  border: 2px solid black;
-  border-radius: 5px;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-}
+
+
 
 #btn-group {
   justify-content: space-around;
@@ -73,4 +61,47 @@ button {
 
 .y-bonus:last-child {
  border: none; 
+}
+
+#dice-board {
+  border: 3px solid red;
+  border-radius: 3px;
+}
+
+.dice {
+ display: inline-flex;
+ width: 40px;
+ height: 40px;
+ justify-content: center;
+ margin: 0 auto;
+ background-size: cover;
+}
+
+.dice.dot1 {
+  background-image: url('../images/one.png');
+}
+
+.dice.dot2 {
+  background-image: url('../images/two.png');
+  /* background-size: cover; */
+}
+
+.dice.dot3 {
+  background-image: url('../images/three.png');
+  /* background-size: cover; */
+}
+
+.dice.dot4 {
+  background-image: url('../images/four.png');
+  /* background-size: cover; */
+}
+
+.dice.dot5 {
+  background-image: url('../images/five.png');
+  /* background-size: cover; */
+}
+
+.dice.dot6 {
+  background-image: url('../images/six.png');
+  /* background-size: cover; */
 }

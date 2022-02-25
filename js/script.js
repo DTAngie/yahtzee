@@ -1,12 +1,13 @@
 const diceBoardEl = document.getElementById("dice-board");
+const scoreboardEl = document.getElementById("scoreboard");
 const rollBtn = document.getElementById("roll-btn");
 const confirmBtn = document.getElementById("confirm");
-const scoreboardEl = document.getElementById("scoreboard");
-const playerScoreEl = document.getElementById("score");
+const resetBtn = document.getElementById("reset");
 
 rollBtn.addEventListener('click', handleRollDice);
-diceBoardEl.addEventListener('click', handleDiceClick);
 confirmBtn.addEventListener('click', handleConfirmChoice);
+resetBtn.addEventListener('click', handleReset);
+diceBoardEl.addEventListener('click', handleDiceClick);
 scoreboardEl.addEventListener('click', handleAddScore);
 
 let currentRoll, totalScore, previousSelection, s;
@@ -144,7 +145,7 @@ let scoreboard = {
     bonus: [],
     flatScore: 100,
     total: function(){
-      return this.bonus.push(this.flatScore);
+      return this.bonus.length ? this.playerScore = this.bonus.reduce((a,b) => a + b) : 0;
     },
     isEligible: function(yzee){
       return ((this.bonus.length) < 4 && yzee.playerScore) ? {"id": this.bonus.length, "score": this.flatScore} : {};
@@ -207,20 +208,25 @@ function init() {
 function render(){
   diceBoardEl.innerHTML = "";
   for(d in dice){
-    let diceEl = document.createElement("div");
+    // let diceEl = document.createElement("div");
+    let diceEl = document.createElement("img");
     diceEl.classList.add("dice");
     if (dice[d].hold) diceEl.classList.add("hold");
     diceEl.setAttribute('id', d);
-    diceEl.textContent = dice[d].value;
+    diceEl.setAttribute("src", getImage(dice[d].value));
+    // diceEl.textContent = dice[d].value;
     diceBoardEl.appendChild(diceEl);
   }
   generateScoreBoard();
-  playerScoreEl.innerText = totalScore;
   if (currentRoll === 4) {
     rollBtn.setAttribute('disabled', true)
   } else {
     rollBtn.removeAttribute('disabled');
   }
+}
+
+function handleReset(){
+  init();
 }
 
 function handleRollDice() {
@@ -243,7 +249,15 @@ function handleDiceClick(e) {
 
 function handleConfirmChoice(e) {
   currentRoll = 1;
-  scoreboard[selectedCategory.id].playerScore = selectedCategory.score;
+  if(selectedCategory.id.includes('-') && selectedCategory.score) {
+    yahtzeeBonus.bonus.push(yahtzeeBonus.flatScore);
+    if (yahtzeeBonus.bonus.length === 3) {
+      yahtzeeBonus.taken = true;
+    }
+  } else {
+    scoreboard[selectedCategory.id].playerScore = selectedCategory.score;
+    scoreboard[selectedCategory.id].taken = true;
+  }
   for(d in dice) {
     dice[d].hold = false;
   }
@@ -260,7 +274,7 @@ function handleAddScore(e) {
   if(!e.target.id) return;
   let categoryID = e.target.id.split('-');
   let category = scoreboard[categoryID[0]] ;
-  if(category.playerScore || category.locked) return;
+  if(category.taken || category.locked) return;
   let el = e.target;
   // this prevents multiple scores per round
   if(previousSelection) {
@@ -273,10 +287,7 @@ function handleAddScore(e) {
     selectedCategory.score = category.requires * (diceArray.filter(x => x === category.requires).length);
   }
   if(categoryID[0] === '16') { //yahtzee bonus section
-    // yahtzee.playerScore= 50;
-    console.log(yahtzee)
     let ybonus = yahtzeeBonus.isEligible(yahtzee);
-    console.log(ybonus)
     if (Object.entries(ybonus).length) {
       selectedCategory.id =`16-${ybonus.id}`;
       selectedCategory.score = `${ybonus.score}`;
@@ -284,7 +295,6 @@ function handleAddScore(e) {
     } else {
       selectedCategory.score = null;
     }
-    console.log(selectedCategory)
   }
   diceArray.sort();
   switch (e.target.id) {
@@ -308,14 +318,10 @@ function handleAddScore(e) {
       selectedCategory.score = (s.includes('12345') || s.includes('23456')) ? category.flatScore : 0;
       break;
     case "14":
-      selectedCategory.score = (diceArray[0] === diceArray[4]) ? category.flatScore : 0; 
-      //TODO: check for multiple yahtzees   
+      selectedCategory.score = (diceArray[0] === diceArray[4]) ? category.flatScore : 0;   
       break;
     case "15":
       selectedCategory.score = diceArray.reduce((a,b) => a+b);
-      break;
-    case "16":
-      console.log(e.target.id)
       break;
   }
   el.textContent = selectedCategory.score;
@@ -332,7 +338,6 @@ function resetScore() {
   }
   bonus.bonusReached = false;
   yahtzeeBonus.bonus = [];
-  console.log(scoreboard)
 }
 
 function generateDice(){
@@ -346,7 +351,6 @@ function generateDice(){
 function generateScoreBoard(){
   scoreboardEl.innerHTML = "";
   for(let i = 0; i < Object.entries(scoreboard).length; i++) {
-    console.log('this is ', i)
     let thisCategory = scoreboard[i];
     let scoreRowEl = document.createElement('div');
     let nameDivEl = document.createElement('div');
@@ -381,7 +385,6 @@ function generateScoreBoard(){
 
 function rollDice() {
   if (currentRoll > 3) return;
-  console.log('current roll is', currentRoll)
   diceArray = [];
   for(d in dice){
     if(!dice[d].hold) {
@@ -392,15 +395,41 @@ function rollDice() {
   currentRoll++;
 }
 
-function updateTotals(){
+function updateTotals(moreYahtzees){
   upperTotal.total();
   if(upperTotal.playerScore >= bonus.requires) {
     bonus.bonusReached = true;
   }
   upperTotal2.total(bonus.total(), upperTotal.playerScore);
+  yahtzeeBonus.total();
   lowerTotal.total();
   upperTotal3.total(upperTotal2.playerScore);
   grandTotal.total(upperTotal.playerScore, lowerTotal.playerScore);
+}
+
+function getImage(val){
+  let fileName;
+  switch(val) {
+    case 1:
+      fileName = "one";
+      break;
+    case 2:
+      fileName = "two";
+      break;
+    case 3:
+      fileName = "three";
+      break;
+    case 4:
+      fileName = "four";
+      break;
+    case 5:
+      fileName = "five";
+      break;
+    case 6:
+      fileName = "six";
+      break;
+  }
+  return `./images/${fileName}.png`;
 }
 
 init();
