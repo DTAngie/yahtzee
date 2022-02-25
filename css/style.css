@@ -47,6 +47,10 @@ h1, h3 {
   text-transform: uppercase;
 }
 
+h2 {
+  margin: 0 auto;
+}
+
 .flex {
   display: flex;
   margin: 0;
@@ -66,10 +70,11 @@ h1, h3 {
 }
 
 .dice {
- width: 40px;
- height: 40px;
- margin: 0 auto;
- background-size: cover;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  background-size: cover;
 }
 
 #scoreboard {
@@ -77,6 +82,12 @@ h1, h3 {
   box-shadow: 1px 1px 10px rgba(0,0,0, 0.5);
   border-radius: 4px;
   width: 80%;
+}
+
+.scoreboard-row.header {
+  font-weight: bold;
+  background-color: #992424;
+  font-size: 18px;
 }
 
 .scoreboard-row > div.flex {
@@ -99,6 +110,7 @@ h1, h3 {
 }
 
 .scoreboard-row > .player-score {
+  cursor: pointer;
   width: 30%;
   text-align: center;
   padding: 5px 0;
@@ -120,7 +132,7 @@ h1, h3 {
 }
 
 .hold {
-  background-color: #ccc;
+ filter: invert(0.8);
 }
 
 .y-bonus {

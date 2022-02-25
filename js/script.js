@@ -10,7 +10,7 @@ resetBtn.addEventListener('click', handleReset);
 diceBoardEl.addEventListener('click', handleDiceClick);
 scoreboardEl.addEventListener('click', handleAddScore);
 
-let currentRoll, totalScore, previousSelection, s;
+let scoreCount, currentRoll, totalScore, previousSelection, s;
 let dice = {};
 let diceArray = [];
 let selectedCategory = {};
@@ -207,22 +207,28 @@ function init() {
 
 function render(){
   diceBoardEl.innerHTML = "";
-  for(d in dice){
-    // let diceEl = document.createElement("div");
-    let diceEl = document.createElement("img");
-    diceEl.classList.add("dice");
-    if (dice[d].hold) diceEl.classList.add("hold");
-    diceEl.setAttribute('id', d);
-    diceEl.setAttribute("src", getImage(dice[d].value));
-    diceEl.setAttribute("alt", `dice ${dice[d].value}`);
-    diceBoardEl.appendChild(diceEl);
+  if(!checkGameOver()){
+    for(d in dice){
+      let diceEl = document.createElement("img");
+      diceEl.classList.add("dice");
+      if (dice[d].hold) diceEl.classList.add("hold");
+      diceEl.setAttribute('id', d);
+      diceEl.setAttribute("src", getImage(dice[d].value));
+      diceEl.setAttribute("alt", `dice ${dice[d].value}`);
+      diceBoardEl.appendChild(diceEl);
+    }
+    if (currentRoll === 4) {
+      rollBtn.setAttribute('disabled', true);
+    } else {
+      rollBtn.removeAttribute('disabled');
+    }
+  } else {
+    let gameOverEl = document.createElement("h2");
+    gameOverEl.textContent = "Game Over";
+    diceBoardEl.appendChild(gameOverEl);
+    rollBtn.setAttribute('disabled', true);
   }
   generateScoreBoard();
-  if (currentRoll === 4) {
-    rollBtn.setAttribute('disabled', true)
-  } else {
-    rollBtn.removeAttribute('disabled');
-  }
 }
 
 function handleReset(){
@@ -251,6 +257,7 @@ function handleConfirmChoice(e) {
   currentRoll = 1;
   if(selectedCategory.id.includes('-') && selectedCategory.score) {
     yahtzeeBonus.bonus.push(yahtzeeBonus.flatScore);
+    scoreCount--;
     if (yahtzeeBonus.bonus.length === 3) {
       yahtzeeBonus.taken = true;
     }
@@ -296,7 +303,8 @@ function handleAddScore(e) {
       el = document.getElementById(`16-${ybonus.id}`);
     } else {
       selectedCategory.score = null;
-    }
+      confirmBtn.setAttribute('disabled', true)
+;    }
   }
   switch (e.target.id) {
     case "9":
@@ -339,6 +347,7 @@ function resetScore() {
   }
   bonus.bonusReached = false;
   yahtzeeBonus.bonus = [];
+  scoreCount = 0;
 }
 
 function generateDice(){
@@ -359,6 +368,9 @@ function generateScoreBoard(){
     let playerScoreDivEl = document.createElement('div');
     playerScoreDivEl.setAttribute('id', i);
     scoreRowEl.classList.add('scoreboard-row', 'flex');
+    if (thisCategory.locked) {
+      scoreRowEl.classList.add('header');
+    }
     nameDivEl.classList.add('category');
     nameDivEl.innerHTML = `${thisCategory.display} ${(thisCategory.display2) ? "<br>"+thisCategory.display2 : ""}`;
     scoringDivEl.classList.add('scoring');
@@ -397,6 +409,7 @@ function rollDice() {
 }
 
 function updateTotals(moreYahtzees){
+  scoreCount++;
   upperTotal.total();
   if(upperTotal.playerScore >= bonus.requires) {
     bonus.bonusReached = true;
@@ -406,6 +419,10 @@ function updateTotals(moreYahtzees){
   lowerTotal.total();
   upperTotal3.total(upperTotal2.playerScore);
   grandTotal.total(upperTotal.playerScore, lowerTotal.playerScore);
+}
+
+function checkGameOver(){
+ return scoreCount >= 13 ? true : false;
 }
 
 function getImage(val){
